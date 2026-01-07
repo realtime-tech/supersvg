@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random SVG Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #svg-container {
+            width: 100%;
+            height: 500px;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #f8f9fa;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .info {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            #svg-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Random SVG Art Generator</h1>
+        
+        <div class="controls">
+            <button onclick="generateSVG()">Generate New Art</button>
+            <button onclick="downloadSVG()">Download SVG</button>
+        </div>
+
+        <div id="svg-container"></div>
+
+        <div class="info">
+            Click "Generate New Art" to create a unique piece of generative art!
+        </div>
+    </div>
+
+    <script>
+        // Main function to generate the SVG artwork
+        function generateSVG() {
+            const container = document.getElementById('svg-container');
+            
+            // Clear previous SVG
+            container.innerHTML = '';
+            
+            // Create SVG element with proper viewBox for scaling
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', '0 0 800 500');
+            svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+            
+            // Create a gradient definition for more interesting colors
+            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            
+            // Generate 2-3 radial gradients with random colors
+            const numGradients = randomInt(2, 4);
+            for (let i = 0; i < numGradients; i++) {
+                const gradient = createRadialGradient(`gradient${i}`);
+                defs.appendChild(gradient);
+            }
+            
+            svg.appendChild(defs);
+            
+            // Create background with subtle gradient
+            const background = createRect(0, 0, 800, 500, getRandomPastelColor(), 1);
+            svg.appendChild(background);
+            
+            // Decide randomly what type of artwork to generate
+            const artStyle = randomInt(0, 4);
+            
+            switch(artStyle) {
+                case 0:
+                    generateOrganicBlobs(svg, numGradients);
+                    break;
+                case 1:
+                    generateGeometricShapes(svg);
+                    break;
+                case 2:
+                    generateFlowingCurves(svg);
+                    break;
+                case 3:
+                    generateCirclePattern(svg, numGradients);
+                    break;
+            }
+            
+            container.appendChild(svg);
+        }
+
+        // Generate organic blob shapes using bezier curves
+        function generateOrganicBlobs(svg, numGradients) {
+            const numBlobs = randomInt(5, 10);
+            
+            for (let i = 0; i < numBlobs; i++) {
+                const centerX = randomInt(50, 750);
+                const centerY = randomInt(50, 450);
+                const size = randomInt(50, 150);
+                const points = randomInt(6, 10);
+                
+                // Create smooth blob using bezier curves
+                const path = createBlobPath(centerX, centerY, size, points);
+                const gradientId = `gradient${randomInt(0, numGradients)}`;
+                
+                path.setAttribute('fill', `url(#${gradientId})`);
+                path.setAttribute('opacity', random(0.6, 0.9));
+                
+                svg.appendChild(path);
+            }
+        }
+
+        // Generate geometric shapes (circles, rectangles, triangles)
+        function generateGeometricShapes(svg) {
+            const numShapes = randomInt(15, 30);
+            
+            for (let i = 0; i < numShapes; i++) {
+                const shapeType = randomInt(0, 3);
+                const x = randomInt(0, 800);
+                const y = randomInt(0, 500);
+                const size = randomInt(20, 100);
+                const color = getRandomVibrantColor();
+                const opacity = random(0.5, 0.9);
+                
+                let shape;
+                if (shapeType === 0) {
+                    // Circle
+                    shape = createCircle(x, y, size / 2, color, opacity);
+                } else if (shapeType === 1) {
+                    // Rectangle
+                    shape = createRect(x, y, size, size, color, opacity);
+                    shape.setAttribute('rx', randomInt(5, 20)); // Rounded corners
+                } else {
+                    // Triangle using path
+                    shape = createTriangle(x, y, size, color, opacity);
+                }
+                
+                svg.appendChild(shape);
+            }
+        }
+
+        // Generate flowing bezier curves
+        function generateFlowingCurves(svg) {
+            const numCurves = randomInt(8, 15);
+            
+            for (let i = 0; i < numCurves; i++) {
+                const startX = randomInt(0, 800);
+                const startY = randomInt(0, 500);
+                const endX = randomInt(0, 800);
+                const endY = randomInt(0, 500);
+                
+                // Create smooth curve with control points
+                const path = createSmoothCurve(startX, startY, endX, endY);
+                const color = getRandomVibrantColor();
+                
+                path.setAttribute('stroke', color);
+                path.setAttribute('stroke-width', randomInt(2, 8));
+                path.setAttribute('fill', 'none');
+                path.setAttribute('opacity', random(0.6, 0.9));
+                path.setAttribute('stroke-linecap', 'round');
+                
+                svg.appendChild(path);
+            }
+        }
+
+        // Generate overlapping circles pattern
+        function generateCirclePattern(svg, numGradients) {
+            const numCircles = randomInt(20, 40);
+            
+            for (let i = 0; i < numCircles; i++) {
+                const x = randomInt(0, 800);
+                const y = randomInt(0, 500);
+                const radius = randomInt(10, 80);
+                const gradientId = `gradient${randomInt(0, numGradients)}`;
+                
+                const circle = createCircle(x, y, radius, `url(#${gradientId})`, random(0.3, 0.7));
+                svg.appendChild(circle);
+            }
+        }
+
+        // Helper function to create a blob path using bezier curves
+        function createBlobPath(cx, cy, size, numPoints) {
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            let d = '';
+            
+            const angleStep = (Math.PI * 2) / numPoints;
+            const points = [];
+            
+            // Generate points around a circle with random variation
+            for (let i = 0; i < numPoints; i++) {
+                const angle = angleStep * i;
+                const radiusVariation = size * random(0.7, 1.3);
+                const x = cx + Math.cos(angle) * radiusVariation;
+                const y = cy + Math.sin(angle) * radiusVariation;
+                points.push({ x, y });
+            }
+            
+            // Start path
+            d = `M ${points[0].x} ${points[0].y}`;
+            
+            // Create smooth curves between points using quadratic bezier
+            for (let i = 0; i < numPoints; i++) {
+                const current = points[i];
+                const next = points[(i + 1) % numPoints];
+                const nextNext = points[(i + 2) % numPoints];
+                
+                // Control point is between current and next
+                const cpX = (next.x + nextNext.x) / 2;
+                const cpY = (next.y + nextNext.y) / 2;
+                
+                d += ` Q ${next.x} ${next.y}, ${cpX} ${cpY}`;
+            }
+            
+            d += ' Z'; // Close path
+            path.setAttribute('d', d);
+            
+            return path;
+        }
+
+        // Helper function to create a smooth curve between two points
+        function createSmoothCurve(x1, y1, x2, y2) {
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            
+            // Create control points for cubic bezier curve
+            const cp1x = x1 + randomInt(-200, 200);
+            const cp1y = y1 + randomInt(-200, 200);
+            const cp2x = x2 + randomInt(-200, 200);
+            const cp2y = y2 + randomInt(-200, 200);
+            
+            const d = `M ${x1} ${y1} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x2} ${y2}`;
+            path.setAttribute('d', d);
+            
+            return path;
+        }
+
+        // Helper function to create a triangle
+        function createTriangle(x, y, size, color, opacity) {
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            
+            const x1 = x;
+            const y1 = y;
+            const x2 = x + size;
+            const y2 = y;
+            const x3 = x + size / 2;
+            const y3 = y + size * 0.866; // Height of equilateral triangle
+            
+            const d = `M ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3} Z`;
+            path.setAttribute('d', d);
+            path.setAttribute('fill', color);
+            path.setAttribute('opacity', opacity);
+            
+            return path;
+        }
+
+        // Helper function to create a circle element
+        function createCircle(cx, cy, r, fill, opacity) {
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', cx);
+            circle.setAttribute('cy', cy);
+            circle.setAttribute('r', r);
+            circle.setAttribute('fill', fill);
+            circle.setAttribute('opacity', opacity);
+            return circle;
+        }
+
+        // Helper function to create a rectangle element
+        function createRect(x, y, width, height, fill, opacity) {
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', x);
+            rect.setAttribute('y', y);
+            rect.setAttribute('width', width);
+            rect.setAttribute('height', height);
+            rect.setAttribute('fill', fill);
+            rect.setAttribute('opacity', opacity);
+            return rect;
+        }
+
+        // Helper function to create a radial gradient
+        function createRadialGradient(id) {
+            const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
+            gradient.setAttribute('id', id);
+            
+            const color1 = getRandomVibrantColor();
+            const color2 = getRandomVibrantColor();
+            
+            const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+            stop1.setAttribute('offset', '0%');
+            stop1.setAttribute('stop-color', color1);
+            
+            const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+            stop2.setAttribute('offset', '100%');
+            stop2.setAttribute('stop-color', color2);
+            
+            gradient.appendChild(stop1);
+            gradient.appendChild(stop2);
+            
+            return gradient;
+        }
+
+        // Generate random vibrant color
+        function getRandomVibrantColor() {
+            const colors = [
+                '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+                '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B88B', '#ABEBC6',
+                '#FF8ED4', '#6C5CE7', '#FD79A8', '#74B9FF', '#A29BFE'
+            ];
+            return colors[randomInt(0, colors.length)];
+        }
+
+        // Generate random pastel color for background
+        function getRandomPastelColor() {
+            const hue = randomInt(0, 360);
+            return `hsl(${hue}, 50%, 90%)`;
+        }
+
+        // Random integer between min (inclusive) and max (exclusive)
+        function randomInt(min, max) {
+            return Math.floor(Math.random() * (max - min)) + min;
+        }
+
+        // Random float between min and max
+        function random(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        // Function to download the SVG
+        function downloadSVG() {
+            const svg = document.querySelector('#svg-container svg');
+            if (!svg) {
+                alert('Generate an SVG first!');
+                return;
+            }
+            
+            // Serialize SVG to string
+            const serializer = new XMLSerializer();
+            const svgString = serializer.serializeToString(svg);
+            
+            // Create blob and download
+            const blob = new Blob([svgString], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `random-art-${Date.now()}.svg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Generate initial SVG on page load
+        window.addEventListener('DOMContentLoaded', generateSVG);
+    </script>
+</body>
+</html>
